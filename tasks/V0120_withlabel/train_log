@@ -1,0 +1,192 @@
+2021-01-23 09:13:55.239 | INFO     | __main__:main:53 - The config file is {'model': Model(
+  (cresnet): DataParallel(
+    (module): ResNet(
+      (Net): Sequential(
+        (0): Conv1d(7, 32, kernel_size=(1,), stride=(1,), bias=False)
+        (1): Conv1d(32, 32, kernel_size=(1,), stride=(1,))
+        (2): BatchNorm1d(32, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+        (3): ReLU(inplace=True)
+        (4): Sequential(
+          (0): Bottleneck(
+            (conv1): Conv1d(32, 32, kernel_size=(1,), stride=(1,), bias=False)
+            (bn1): BatchNorm1d(32, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+            (conv2): Conv1d(32, 32, kernel_size=(11,), stride=(1,), padding=(5,))
+            (bn2): BatchNorm1d(32, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+            (conv3): Conv1d(32, 128, kernel_size=(1,), stride=(1,), bias=False)
+            (bn3): BatchNorm1d(128, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+            (relu): ReLU(inplace=True)
+            (downsample): Sequential(
+              (0): Conv1d(32, 128, kernel_size=(1,), stride=(1,), bias=False)
+              (1): BatchNorm1d(128, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+            )
+          )
+          (1): Bottleneck(
+            (conv1): Conv1d(128, 32, kernel_size=(1,), stride=(1,), bias=False)
+            (bn1): BatchNorm1d(32, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+            (conv2): Conv1d(32, 32, kernel_size=(11,), stride=(1,), padding=(5,))
+            (bn2): BatchNorm1d(32, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+            (conv3): Conv1d(32, 128, kernel_size=(1,), stride=(1,), bias=False)
+            (bn3): BatchNorm1d(128, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+            (relu): ReLU(inplace=True)
+          )
+          (2): Bottleneck(
+            (conv1): Conv1d(128, 32, kernel_size=(1,), stride=(1,), bias=False)
+            (bn1): BatchNorm1d(32, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+            (conv2): Conv1d(32, 32, kernel_size=(11,), stride=(1,), padding=(5,))
+            (bn2): BatchNorm1d(32, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+            (conv3): Conv1d(32, 128, kernel_size=(1,), stride=(1,), bias=False)
+            (bn3): BatchNorm1d(128, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+            (relu): ReLU(inplace=True)
+          )
+        )
+        (5): Sequential(
+          (0): Bottleneck(
+            (conv1): Conv1d(128, 32, kernel_size=(1,), stride=(1,), bias=False)
+            (bn1): BatchNorm1d(32, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+            (conv2): Conv1d(32, 32, kernel_size=(11,), stride=(1,), padding=(30,), dilation=(6,))
+            (bn2): BatchNorm1d(32, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+            (conv3): Conv1d(32, 128, kernel_size=(1,), stride=(1,), bias=False)
+            (bn3): BatchNorm1d(128, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+            (relu): ReLU(inplace=True)
+          )
+          (1): Bottleneck(
+            (conv1): Conv1d(128, 32, kernel_size=(1,), stride=(1,), bias=False)
+            (bn1): BatchNorm1d(32, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+            (conv2): Conv1d(32, 32, kernel_size=(11,), stride=(1,), padding=(30,), dilation=(6,))
+            (bn2): BatchNorm1d(32, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+            (conv3): Conv1d(32, 128, kernel_size=(1,), stride=(1,), bias=False)
+            (bn3): BatchNorm1d(128, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+            (relu): ReLU(inplace=True)
+          )
+          (2): Bottleneck(
+            (conv1): Conv1d(128, 32, kernel_size=(1,), stride=(1,), bias=False)
+            (bn1): BatchNorm1d(32, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+            (conv2): Conv1d(32, 32, kernel_size=(11,), stride=(1,), padding=(30,), dilation=(6,))
+            (bn2): BatchNorm1d(32, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+            (conv3): Conv1d(32, 128, kernel_size=(1,), stride=(1,), bias=False)
+            (bn3): BatchNorm1d(128, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+            (relu): ReLU(inplace=True)
+          )
+        )
+        (6): Sequential(
+          (0): Bottleneck(
+            (conv1): Conv1d(128, 32, kernel_size=(1,), stride=(1,), bias=False)
+            (bn1): BatchNorm1d(32, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+            (conv2): Conv1d(32, 32, kernel_size=(21,), stride=(1,), padding=(110,), dilation=(11,))
+            (bn2): BatchNorm1d(32, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+            (conv3): Conv1d(32, 128, kernel_size=(1,), stride=(1,), bias=False)
+            (bn3): BatchNorm1d(128, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+            (relu): ReLU(inplace=True)
+          )
+          (1): Bottleneck(
+            (conv1): Conv1d(128, 32, kernel_size=(1,), stride=(1,), bias=False)
+            (bn1): BatchNorm1d(32, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+            (conv2): Conv1d(32, 32, kernel_size=(21,), stride=(1,), padding=(110,), dilation=(11,))
+            (bn2): BatchNorm1d(32, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+            (conv3): Conv1d(32, 128, kernel_size=(1,), stride=(1,), bias=False)
+            (bn3): BatchNorm1d(128, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+            (relu): ReLU(inplace=True)
+          )
+          (2): Bottleneck(
+            (conv1): Conv1d(128, 32, kernel_size=(1,), stride=(1,), bias=False)
+            (bn1): BatchNorm1d(32, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+            (conv2): Conv1d(32, 32, kernel_size=(21,), stride=(1,), padding=(110,), dilation=(11,))
+            (bn2): BatchNorm1d(32, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+            (conv3): Conv1d(32, 128, kernel_size=(1,), stride=(1,), bias=False)
+            (bn3): BatchNorm1d(128, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+            (relu): ReLU(inplace=True)
+          )
+        )
+        (7): Sequential(
+          (0): Bottleneck(
+            (conv1): Conv1d(128, 32, kernel_size=(1,), stride=(1,), bias=False)
+            (bn1): BatchNorm1d(32, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+            (conv2): Conv1d(32, 32, kernel_size=(81,), stride=(1,), padding=(840,), dilation=(21,))
+            (bn2): BatchNorm1d(32, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+            (conv3): Conv1d(32, 128, kernel_size=(1,), stride=(1,), bias=False)
+            (bn3): BatchNorm1d(128, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+            (relu): ReLU(inplace=True)
+          )
+          (1): Bottleneck(
+            (conv1): Conv1d(128, 32, kernel_size=(1,), stride=(1,), bias=False)
+            (bn1): BatchNorm1d(32, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+            (conv2): Conv1d(32, 32, kernel_size=(81,), stride=(1,), padding=(840,), dilation=(21,))
+            (bn2): BatchNorm1d(32, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+            (conv3): Conv1d(32, 128, kernel_size=(1,), stride=(1,), bias=False)
+            (bn3): BatchNorm1d(128, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+            (relu): ReLU(inplace=True)
+          )
+          (2): Bottleneck(
+            (conv1): Conv1d(128, 32, kernel_size=(1,), stride=(1,), bias=False)
+            (bn1): BatchNorm1d(32, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+            (conv2): Conv1d(32, 32, kernel_size=(81,), stride=(1,), padding=(840,), dilation=(21,))
+            (bn2): BatchNorm1d(32, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+            (conv3): Conv1d(32, 128, kernel_size=(1,), stride=(1,), bias=False)
+            (bn3): BatchNorm1d(128, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+            (relu): ReLU(inplace=True)
+          )
+        )
+        (8): Sequential(
+          (0): Bottleneck(
+            (conv1): Conv1d(128, 32, kernel_size=(1,), stride=(1,), bias=False)
+            (bn1): BatchNorm1d(32, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+            (conv2): Conv1d(32, 32, kernel_size=(81,), stride=(1,), padding=(1640,), dilation=(41,))
+            (bn2): BatchNorm1d(32, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+            (conv3): Conv1d(32, 128, kernel_size=(1,), stride=(1,), bias=False)
+            (bn3): BatchNorm1d(128, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+            (relu): ReLU(inplace=True)
+          )
+          (1): Bottleneck(
+            (conv1): Conv1d(128, 32, kernel_size=(1,), stride=(1,), bias=False)
+            (bn1): BatchNorm1d(32, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+            (conv2): Conv1d(32, 32, kernel_size=(81,), stride=(1,), padding=(1640,), dilation=(41,))
+            (bn2): BatchNorm1d(32, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+            (conv3): Conv1d(32, 128, kernel_size=(1,), stride=(1,), bias=False)
+            (bn3): BatchNorm1d(128, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+            (relu): ReLU(inplace=True)
+          )
+          (2): Bottleneck(
+            (conv1): Conv1d(128, 32, kernel_size=(1,), stride=(1,), bias=False)
+            (bn1): BatchNorm1d(32, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+            (conv2): Conv1d(32, 32, kernel_size=(81,), stride=(1,), padding=(1640,), dilation=(41,))
+            (bn2): BatchNorm1d(32, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+            (conv3): Conv1d(32, 128, kernel_size=(1,), stride=(1,), bias=False)
+            (bn3): BatchNorm1d(128, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+            (relu): ReLU(inplace=True)
+          )
+        )
+        (9): Dropout(p=0.5, inplace=False)
+      )
+    )
+  )
+  (sig): Sigmoid()
+  (relu): ReLU()
+  (soft): Softmax(dim=-1)
+  (out_fc): Linear(in_features=128, out_features=1, bias=True)
+  (ene_fc): Linear(in_features=128, out_features=1, bias=True)
+  (tanh): Tanh()
+), 'train_path': 'data/dev/train_old.txt', 'test_path': 'data/dev/dev.txt', 'epochs': 200, 'log_path': 'tasks/V0120_withlabel/', 'use_label': True, 'num_workers': 3, 'cut': True}
+2021-01-23 09:13:58.420 | INFO     | __main__:main:61 - Train data size 38 Test data size 2
+2021-01-23 09:14:06.470 | INFO     | __main__:main:70 - EPOCH 0 : ACC=0 RMSD=0.24312160909175873 loss=826.6915283203125
+2021-01-23 09:14:14.232 | INFO     | __main__:main:70 - EPOCH 1 : ACC=0 RMSD=0.2118840366601944 loss=654.4540405273438
+2021-01-23 09:14:21.970 | INFO     | __main__:main:70 - EPOCH 2 : ACC=0 RMSD=0.20431505143642426 loss=616.1686401367188
+2021-01-23 09:14:29.711 | INFO     | __main__:main:70 - EPOCH 3 : ACC=0 RMSD=0.22024814784526825 loss=593.9531860351562
+2021-01-23 09:14:37.433 | INFO     | __main__:main:70 - EPOCH 4 : ACC=0 RMSD=0.19731256365776062 loss=583.268310546875
+2021-01-23 09:14:45.162 | INFO     | __main__:main:70 - EPOCH 5 : ACC=0 RMSD=0.19702301919460297 loss=574.2387084960938
+2021-01-23 09:14:52.908 | INFO     | __main__:main:70 - EPOCH 6 : ACC=0 RMSD=0.19532102346420288 loss=568.030517578125
+2021-01-23 09:15:00.599 | INFO     | __main__:main:70 - EPOCH 7 : ACC=0 RMSD=0.19372037053108215 loss=561.8005981445312
+2021-01-23 09:15:08.332 | INFO     | __main__:main:70 - EPOCH 8 : ACC=0 RMSD=0.1951305866241455 loss=557.0861206054688
+2021-01-23 09:15:16.069 | INFO     | __main__:main:70 - EPOCH 9 : ACC=0 RMSD=0.1932254433631897 loss=552.0419311523438
+2021-01-23 09:15:16.163 | INFO     | __main__:main:76 - Adjust lr 0.0001
+2021-01-23 09:15:23.795 | INFO     | __main__:main:70 - EPOCH 10 : ACC=0 RMSD=0.1914736032485962 loss=544.0968627929688
+2021-01-23 09:15:31.507 | INFO     | __main__:main:70 - EPOCH 11 : ACC=0 RMSD=0.19154031574726105 loss=540.2138671875
+2021-01-23 09:15:39.240 | INFO     | __main__:main:70 - EPOCH 12 : ACC=0 RMSD=0.1916293352842331 loss=539.1657104492188
+2021-01-23 09:15:46.953 | INFO     | __main__:main:70 - EPOCH 13 : ACC=0 RMSD=0.1920362114906311 loss=537.4418334960938
+2021-01-23 09:15:54.682 | INFO     | __main__:main:70 - EPOCH 14 : ACC=0 RMSD=0.191908061504364 loss=536.126220703125
+2021-01-23 09:16:02.392 | INFO     | __main__:main:70 - EPOCH 15 : ACC=0 RMSD=0.19208209216594696 loss=534.9926147460938
+2021-01-23 09:16:10.130 | INFO     | __main__:main:70 - EPOCH 16 : ACC=0 RMSD=0.1925148069858551 loss=533.6033325195312
+2021-01-23 09:16:17.852 | INFO     | __main__:main:70 - EPOCH 17 : ACC=0 RMSD=0.1931847780942917 loss=532.3993530273438
+2021-01-23 09:16:25.567 | INFO     | __main__:main:70 - EPOCH 18 : ACC=0 RMSD=0.19264954328536987 loss=530.5647583007812
+2021-01-23 09:16:33.290 | INFO     | __main__:main:70 - EPOCH 19 : ACC=0 RMSD=0.1933613419532776 loss=529.2632446289062
+2021-01-23 09:16:33.390 | INFO     | __main__:main:76 - Adjust lr 1e-05
+2021-01-23 09:16:41.000 | INFO     | __main__:main:70 - EPOCH 20 : ACC=0 RMSD=0.19261497259140015 loss=526.9180297851562
