@@ -1,182 +1,116 @@
+import math, random
+
+import numpy as np
 import torch
 import torch.nn as nn
-import numpy as np
-import h5py
-from sklearn import metrics
-from scipy import stats
-import matplotlib
-matplotlib.use("Agg")
-import matplotlib.pyplot as plt
-import operator
-from functools import reduce
-from loguru import logger
-import random
-from torch.utils.data import DataLoader
+from .egsage import egsage
 
 
-def conv3x3(inc, outc ,ks, stride=1, groups=1, dilation=1):
-    return nn.Conv1d(inc, outc, ks, stride, padding=((ks-1)*dilation)//2, groups=groups, bias=True, dilation=dilation)
-
-def conv1x1(inc, outc, stride=1):
-    return nn.Conv1d(inc, outc, 1, stride, bias=False)
-
-class BasicBlock(nn.Module):
-    expansion=1
-    def __init__(self, inc, channel, ks, stride=1, downsample=None, groups=1, base_width=64, dilation=1, norm_layer=None):
-        super(BasicBlock, self).__init__()
-        if norm_layer is None:
-            norm_layer=nn.BatchNorm1d
-        self.conv=conv3x3(inc, channel,ks, stride)
-        self.bn1=norm_layer(channel)
-        self.relu=nn.ReLU(inplace=True)
-        self.conv2=conv3x3(channel, channel, ks)
-        self.bn2=norm_layer(channel)
-        self.downsample=downsample
-        self.stride=stride
-    def forward(self, inp):
-        x=self.conv1(inp)
-        x=self.bn1(x)
-        x=self.relu(x)
-
-        x=self.conv2(x)
-        x=self.bn2(x)
-        if self.downsample is not None:
-            inp=self.downsample(inp)
-        x+=inp
-        x=self.relu(x)
-        return x
-
-
-class Bottleneck(nn.Module):
-    expansion=4
-    def __init__(self, inc, channel, ks, stride=1, downsample=None, groups=1, base_width=64, dilation=1, norm_layer=None):
-        super(Bottleneck, self).__init__()
-        if norm_layer is None:
-            norm_layer=nn.BatchNorm1d
-
-        width=int(channel*base_width//64)*groups
-        self.conv1=conv1x1(inc, width)
-        self.bn1=norm_layer(width)
-        self.conv2=conv3x3(width, width, ks, stride, groups, dilation)
-        self.bn2=norm_layer(width)
-        self.conv3=conv1x1(width, channel*self.expansion)
-        self.bn3=norm_layer(channel*self.expansion)
-        self.relu=nn.ReLU(inplace=True)
-        self.downsample=downsample
-        self.stride=stride
-
-    def forward(self, inp):
-        x=self.conv1(inp)
-        x=self.bn1(x)
-        x=self.relu(x)
-
-        x=self.conv2(x)
-        x=self.bn2(x)
-        x=self.relu(x)
-
-        x=self.conv3(x)
-        x=self.bn3(x)
-
-        if self.downsample is not None:
-            inp=self.downsample(inp)
-        x+=inp
-        x=self.relu(x)
-        return x
-
-
-class ResNet(nn.Module):
-    def __init__(self):
-        super(ResNet, self).__init__()
-        norm_layer=nn.BatchNorm1d
-        self.norm_layer=norm_layer
-        self.inc=32
-        self.dilation=9
-        self.base_width=64
-        self.net=[]
-        self.net.append(nn.Conv1d(7, self.inc, kernel_size=1, stride=1, padding=0,bias=False))
-        self.net.append(nn.Conv1d(self.inc, self.inc, kernel_size=1, stride=1, padding=0))
-        self.net.append(norm_layer(self.inc))
-        self.net.append(nn.ReLU(inplace=True))
-        self.net.append(self._make_layer(Bottleneck, 32, 11, 3, 1, 1))
-        self.net.append(self._make_layer(Bottleneck, 32, 11,  3, 1, 6))
-        self.net.append(self._make_layer(Bottleneck, 32, 21, 3, 1, 11))
-        self.net.append(self._make_layer(Bottleneck, 32,81, 3, 1, 21))
-        self.net.append(self._make_layer(Bottleneck, 32,81, 3, 1, 41))
-        self.net.append(nn.Dropout(0.5))
-        self.Net=nn.Sequential(*self.net)
-
-    def forward(self, x):
-        return self.Net(x)
-    
-    def _make_layer(self, block, channel, ks, blocks, stride=1, dilation=1):
-        norm_layer=self.norm_layer
-        downsample=None
-        if stride!=1 or self.inc!=channel*block.expansion:
-            downsample=nn.Sequential(conv1x1(self.inc, channel*block.expansion, stride), norm_layer(channel*block.expansion))
-        layers=[]
-        layers.append(block(self.inc, channel, ks, stride, downsample, 1, self.base_width, dilation, norm_layer))
-        self.inc=channel*block.expansion
-        for _ in range(1, blocks):
-            layers.append(block(self.inc, channel, ks, base_width=self.base_width, dilation=dilation, norm_layer=norm_layer))
-        return nn.Sequential(*layers)
+# from paddle.fluid.dygraph.learning_rate_scheduler import LearningRateDecay
 
 class Model(nn.Module):
-    def __init__(self, lr):
+    def __init__(self, lr
+                 ):
         super(Model, self).__init__()
-        self.Gn=5
+        self.seq_embedding = nn.Embedding(4, 128)
+        self.bra_embedding=nn.Embedding(3, 128)
+        self.net=nn.LSTM(128, 128*4, 8, bidirectional=True, dropout=0.15)
+        self.inp_fc=nn.Linear(128, 128)
+        self.seq_fc=nn.Linear(128, 128)
+        self.fc=nn.Linear(256, 128)
 
-        self.cresnet=ResNet()
-        self.sig=nn.Sigmoid()
+        self.out_linear=nn.Sequential(nn.Linear(256*4, 128), nn.ReLU(), nn.Linear(128, 2))
+        self.gcn1=egsage(128, 128, 1, nn.ReLU,1, True, "mean")
+        self.gcn2 = egsage(128, 128, 1, nn.ReLU, 1, True, "mean")
+
         self.relu=nn.ReLU()
+        self.sig=nn.Sigmoid()
         self.soft=nn.Softmax(-1)
-        self.out_fc=nn.Linear(self.cresnet.inc, 1)
-        self.cinc=self.cresnet.inc
-        self.cresnet=nn.DataParallel(self.cresnet)
-        self.ene_fc=nn.Linear(self.cinc, 1)
-    
-        self.tanh=nn.Tanh()
-        self.optimizer = torch.optim.Adam(self.parameters(), lr=lr)
+        self.optimizer=torch.optim.Adam(self.parameters(), lr=lr)
 
+    def forward(self, seq, dot, slabel):
+        emb_seq=self.seq_embedding(seq)
+        '''edge=[]
+        edge_attr=[]
+        stack=[]
+        assert len(seq)==1
 
-    def forward(self, inp):
-        x=self.cresnet(inp)
-        out=self.out_fc(x.permute(0,2,1)).squeeze(-1)
-        ene=self.ene_fc(x.mean(2)).squeeze(-1)
-        return out, ene
+        for i,x in enumerate(dot[0][0]):
+            if i>0:
+                edge.append([i, i-1])
+                edge.append([i-1, i])
+                edge_attr.append(1.0)
+                edge_attr.append(1.0)
+            if x==0:
+                stack.append(i)
+            elif x==1:
+                l=stack.pop(-1)
+                edge.append([l, i])
+                edge.append([i, l])
+                edge_attr.append(2.0)
+                edge_attr.append(2.0)
+        edge=torch.tensor(edge).cuda().permute(1, 0)
+        edge_attr=torch.tensor(edge_attr).cuda().reshape(-1,1)'''
 
+        emb_dot=(self.bra_embedding(dot)).squeeze(1)#reshape(-1, seq.shape[1], 32)
 
-    def train_onestep(self, data):
+        emb_dot=nn.ReLU()(self.inp_fc(emb_dot))
+        emb_seq=nn.ReLU()(self.seq_fc(emb_seq))
+
+        emb=self.relu(self.fc(torch.cat([emb_seq, emb_dot], 2))).permute(1, 0, 2)
+
+        #emb=self.gcn1(emb.squeeze(1), edge_attr, edge).unsqueeze(1)
+        #emb = self.gcn2(emb.squeeze(1), edge_attr, edge).unsqueeze(1)
+
+        emb, _=self.net(emb)
+        out=self.out_linear(emb).permute(1, 0, 2)
+        out=self.soft(out)
+
+        return out[:, :, 0]
+
+    def train_onestep(self, data, test=False):
         self.train()
         self.optimizer.zero_grad()
-        id, x,y, Ene=data
-        Ene=Ene.cuda()
+        id, x, y, Size, stru, slabel = data
 
-        x=x.permute(0, 2, 1).cuda()
-        y=y.cuda()
-        out, ene=self.forward(x)
-        enemask=(Ene>-9990).float()
-        out=self.sig(out)
-        loss=(((y-out)**2).sum(1).add(1e-9).sqrt()*(1-enemask)).sum()+((ene-Ene)**2*enemask).mean()
+
+        x = x.cuda()
+        y = y.cuda()
+
+        out= self.forward(x, stru.cuda(), slabel)
+
+        loss = ((y - out) ** 2 * (y > -0.1).float()).mean(1).sqrt().add(
+            1e-9).sum()
+
         loss.backward()
         self.optimizer.step()
-        return loss 
+        return loss
 
     def Eval(self, dataloader):
         self.eval()
-        acc=0.0
-        size=0.0
-        rmsd=0.0
-        ret=[]
+        acc = 0.0
+        size = 0.0
+        rmsd = 0.0
+        ret = []
+        gt = []
+        RSize = []
         for data in dataloader:
-            id, x, y, _=data
-            x = x.permute(0, 2, 1).cuda()
-            with torch.no_grad():
-                out=self.sig(self.forward(x)[0])
-            for i,d in enumerate(id):
-                ret.append([d, out[i].detach().cpu().numpy()])
-            rmsd+=((out-y.cuda())**2).mean(1).sqrt().sum()
-            size+=len(x)
+            id, x, y, Size, stru, slabel= data
+            Size = Size.reshape(-1)
+            assert len(Size) == len(x)
 
-        acc=0#acc/size
-        rmsd=rmsd/size
-        return acc, rmsd, ret
+            x = x.cuda()
+            with torch.no_grad():
+                out = self.forward(x, stru.cuda(), slabel.cuda())
+
+            for i, d in enumerate(id):
+                ret.append([d, out[i].detach().cpu().numpy()])
+                gt.append([d, y[i].detach().cpu().numpy()])
+                RSize.append([d, Size[i].numpy().tolist()])
+            rmsd += ((out - y.cuda()) ** 2).mean(1).sqrt().sum()
+            size += len(x)
+
+        acc = 0  # acc/size
+        rmsd = rmsd / size
+        return acc, rmsd, ret, gt, RSize
+
