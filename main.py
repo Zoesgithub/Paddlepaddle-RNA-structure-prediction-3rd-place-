@@ -1,12 +1,12 @@
 import argparse
 import importlib
 from loguru import logger
-from utils import TrainDataSet, PadCollate
-from torch.utils.data import DataLoader
+from utils import TrainDataSet, write_res
 import numpy as np
-import torch
 import os
 import re
+import copy
+import paddle.fluid as fluid
 
 def check_path(path, eval=False):
     if not os.path.exists(path):
@@ -30,6 +30,7 @@ def check_path(path, eval=False):
             return None
     else:
         return None
+
 def main():
     parser=argparse.ArgumentParser()
     parser.add_argument("-c", "--config", help="The path to the config file")
@@ -37,43 +38,65 @@ def main():
 
     config=importlib.import_module(args.config)
     config=config.config
-    model=config["model"].cuda()
+    model=config["model"]
 
     logger.add(os.path.join(config['log_path'], "train_log"))
     if not os.path.exists(os.path.join(config["log_path"], "model/")):
         os.mkdir(os.path.join(config["log_path"], "model"))
-    else:
-        path=check_path(os.path.join(config["log_path"], "model/"))
-        if path:
-            logger.info("Loading model from {}".format(path))
-            checkpoint = torch.load(path)
-
-            model.load_state_dict(checkpoint['param'])
 
     logger.info("The config file is {}".format(config))
 
 
-    traindata=TrainDataSet(config["train_path"], cut=config["cut"], aug=False)
-    testdata=TrainDataSet(config["test_path"], aug=False)
-    traindata=DataLoader(traindata, batch_size=128, shuffle=True, num_workers=config["num_workers"])#, collate_fn=PadCollate(dim=0))
-    testdata=DataLoader(testdata, batch_size=128, shuffle=False, num_workers=1)#, collate_fn=PadCollate(dim=0))
-
-    logger.info("Train data size {} Test data size {}".format(len(traindata), len(testdata)))
+    traindata=TrainDataSet(config["train_path"])
+    testdata=TrainDataSet(config["test_path"])
+    devdata=TrainDataSet(config["dev_path"])
+    traindata=fluid.io.batch(fluid.io.shuffle(traindata.generate_train_data(), buf_size=500), batch_size=1)
+    testdata=fluid.io.batch(fluid.io.shuffle(testdata.generate_train_data(), buf_size=500), batch_size=1)
+    devdata=fluid.io.batch(fluid.io.shuffle(devdata.generate_train_data(), buf_size=500), batch_size=1)
+    #print(traindata())
+    #logger.info("Train data size {} Test data size {}".format(len(traindata), len(testdata)))
     EPOCHS=config["epochs"]
-    for epoch in range(EPOCHS):
-        loss=[]
-        for i, data in enumerate(traindata):
-            loss_=model.train_onestep(data)
-            loss.append(loss_.detach().cpu().numpy())
-        print("Eval ... ")
-        acc, rmsd, ret=model.Eval(testdata)
-        logger.info("EPOCH {} : ACC={} RMSD={} loss={}".format(epoch, acc, rmsd, np.mean(loss)))
-        torch.save({"param": model.state_dict()}, os.path.join(config["log_path"], "model/model.ckpt-{}".format(epoch))) 
-        if epoch%10==9:
-            for param_group in model.optimizer.param_groups:
-                param_group["lr"]/=10.0
-                lr=param_group["lr"]
-            logger.info("Adjust lr {}".format(lr))
+    Model=model
+    Pred=[]
+    Gt=[]
+    for d in range(config["num_models"]):
+        model=Model#copy.deepcopy(Model)
+        for epoch in range(EPOCHS):
+            loss=[]
+            for i, data in enumerate(traindata()):
+                loss_=model.train_onestep(data)
+                #print(loss_)
+                loss.append(np.array(loss_)[0])
+                if i%1000==0:
+                    print(i)
+                #break
+
+            print("Eval ... ")
+            acc, rmsd, ret, gt=model.Eval(testdata())
+            print(acc, rmsd)
+            dacc, drmsd, dret, dgt=model.Eval(devdata())
+            logger.info("EPOCH {} : ACC={} RMSD={} loss={}".format(epoch, dacc, drmsd, np.mean(loss)))
+            #break
+            #if epoch%10==9:
+            #    for param_group in model.optimizer.param_groups:
+            #        param_group["lr"]/=10.0
+            #        lr=param_group["lr"]
+            #    logger.info("Adjust lr {}".format(lr))
+        Pred=ret#.append(ret)
+        Gt=gt#.append(gt)
+        pred=[np.array(x[1]) for x in Pred]
+        gt=[np.array(x[1]) for x in Gt]
+        print([x.shape for x in pred], [x.shape for x in gt])
+        #print(pred.shape, gt.shape)
+        rmsd=pred#[0]
+        res=list(zip(gt, pred))
+        rmsd=np.mean([np.sqrt(((x[0]-x[1])**2).mean()) for x in res])
+
+        logger.info("Round {} : RMSD={} ".format(d, rmsd))
+        path=config["respath"]#os.path.join(config["log_path"], "res{}/".format(d))
+        os.mkdir(path)
+        write_res(Pred,path)
+
 
 if __name__=="__main__":
     main()
