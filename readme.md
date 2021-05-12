@@ -1,4 +1,5 @@
 ## Create env & run 
+The checkpoints are not saved in our training process. The results can be reproduced by running:
 >bash run.sh
 
 The test results are saved in the folder _./result_
