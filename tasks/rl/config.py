@@ -9,7 +9,7 @@ config={
         "dev_path":"data/dev/dev.txt",
         #"dev_path":"data/dev/temp.txt",
         
-        "epochs":15,
+        "epochs":1,
         "log_path":"tasks/rl/",
         "use_label":True,
         "num_workers":1,
