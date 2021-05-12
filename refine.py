@@ -1,4 +1,5 @@
 import sys
+sys.path.append('/home/zhoujianyu/project/rnaopen/lib/lib/python3.8/site-packages')
 import numpy as np
 
 data_dir = 'tasks/rl'
@@ -51,7 +52,7 @@ def generate(filea, fileb, rate):
         with open(data_dir + '/final_trial/' + str(i+1) + '.predict.txt', 'w') as f:
             rsmd = np.sqrt(np.mean((np.array(a[i]) - np.array(b[i]))**2))
             res.append(rsmd)
-            if(rsmd > 0.2):
+            if(rsmd > 0.3):
                 print(i+1, '\t', len(a[i]) , '\t', rsmd)
                 for t in range(len(a[i])):
                     print(a[i][t] * rate + b[i][t] * (1-rate), file = f)
@@ -62,9 +63,9 @@ def generate(filea, fileb, rate):
 
 
 compare('LinearFold', 'res19_0_49')
-generate('LinearFold', 'res19_0_49', 0.5)
-compare('final_trial', 'res19_0_49')
-compare('final_trial', 'LinearFold')
-compare('final_trial', 'uniform')
+generate('LinearFold', 'res19_0_49', 0.3)
+#compare('final_trial', 'res19_0_49')
+#compare('final_trial', 'LinearFold')
+#compare('final_trial', 'uniform')
 #compare('LinearFold', 'uniform')
 #compare('res19_0_49', 'uniform')
