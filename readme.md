@@ -13,5 +13,5 @@ We aim to predict the unpaired probability by estimating the energy parameters i
 
 * Refining module: In practice, we noticed that few RNA structures cannot be accurately predicted by ViennaRNA even with the optimized energy parameters. We compare the predicted probability (_Prob_v_) by ViennaRNA with the binary value (_Prob_b_) given by LinearFold, and for the sequences whose RMSD(Prob_v, Prob_b) is larger than the threshold, we refine their predicted probability as u*Prob_v+(1-u)*Prob_b.
 
-All the hyperparameters are optimized by linear searching. 
+All the hyperparameters are optimized by grid search. 
 
