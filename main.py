@@ -67,35 +67,29 @@ def main():
                 loss_=model.train_onestep(data)
                 #print(loss_)
                 loss.append(np.array(loss_)[0])
-                if i%1000==0:
+                if i%100==0:
                     print(i)
-                #break
 
-            print("Eval ... ")
-            acc, rmsd, ret, gt=model.Eval(testdata())
-            print(acc, rmsd)
-            dacc, drmsd, dret, dgt=model.Eval(devdata())
-            logger.info("EPOCH {} : ACC={} RMSD={} loss={}".format(epoch, dacc, drmsd, np.mean(loss)))
-            #break
-            #if epoch%10==9:
-            #    for param_group in model.optimizer.param_groups:
-            #        param_group["lr"]/=10.0
-            #        lr=param_group["lr"]
-            #    logger.info("Adjust lr {}".format(lr))
-        Pred=ret#.append(ret)
-        Gt=gt#.append(gt)
-        pred=[np.array(x[1]) for x in Pred]
-        gt=[np.array(x[1]) for x in Gt]
-        print([x.shape for x in pred], [x.shape for x in gt])
-        #print(pred.shape, gt.shape)
-        rmsd=pred#[0]
-        res=list(zip(gt, pred))
-        rmsd=np.mean([np.sqrt(((x[0]-x[1])**2).mean()) for x in res])
+                    print("Eval ... ")
+                    acc, rmsd, ret, gt=model.Eval(testdata())
+                    print(acc, rmsd)
+                    dacc, drmsd, dret, dgt=model.Eval(devdata())
+                    logger.info("EPOCH {} : ACC={} RMSD={} loss={}".format(epoch, dacc, drmsd, np.mean(loss)))
 
-        logger.info("Round {} : RMSD={} ".format(d, rmsd))
-        path=config["respath"]#os.path.join(config["log_path"], "res{}/".format(d))
-        os.mkdir(path)
-        write_res(Pred,path)
+                    Pred=ret#.append(ret)
+                    Gt=gt#.append(gt)
+                    pred=[np.array(x[1]) for x in Pred]
+                    gt=[np.array(x[1]) for x in Gt]
+                    print([x.shape for x in pred], [x.shape for x in gt])
+                    #print(pred.shape, gt.shape)
+                    rmsd=pred#[0]
+                    res=list(zip(gt, pred))
+                    rmsd=np.mean([np.sqrt(((x[0]-x[1])**2).mean()) for x in res])
+
+                    logger.info("Round {} : RMSD={} ".format(d, rmsd))
+                    path=config["respath"]+"_{}_{}".format(epoch, i//100)#os.path.join(config["log_path"], "res{}/".format(d))
+                    os.mkdir(path)
+                    write_res(Pred,path)
 
 
 if __name__=="__main__":

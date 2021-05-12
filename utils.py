@@ -20,8 +20,12 @@ def parse_file(path, has_label=True):
     ret=[]
 
     while r<n:
-        assert "id" in content[r]
-        ID=content[r].replace("\n", "").split(" ")[0].split("_")[-1]
+        if not ">" in content[r]:
+            r-=1
+        if "id" in content[r]:
+            ID=content[r].replace("\n", "").split(" ")[0].split("_")[-1]
+        else:
+            ID=content[r].replace("\n", "").split(" ")[-1]
 
         r+=1
         SEQ=content[r].replace("\n", "").upper()
@@ -33,25 +37,29 @@ def parse_file(path, has_label=True):
 
         STRU=[content[r].replace("\n", "")]
         slabel = [[float(_ == ".") for _ in x] for x in STRU]
-        #print(len(STRU[0]), length)
+        print(len(STRU[0]), length)
         assert len(STRU[0])==length
 
         LABEL=[]
-        if has_label and len(content[r+1])>2:
+        with open(path+".predict.files/{}.predict.txt".format(ID), "r") as f:
+            fgt=f.readlines()
+        fgt=[float(x.replace("\n", "")) for x in fgt]
+        if has_label and r+1<len(content) and len(content[r+1])>2:
             while length>0:
                 length-=1
                 r+=1
                 LABEL.append(float(content[r].replace("\n", "").split(" ")[-1]))
             assert len(LABEL)==len(SEQ)
         else:
-            LABEL=[float(x==".") for x in STRU[0]]
+            LABEL=fgt#[float(x==".") for x in STRU[0]]
         r+=2
+        seq0=SEQ
         SEQ=[Dict[x] for x in SEQ]
 
         STRU=[[Labeldict[_] for _ in x] for x in STRU]
         assert len(STRU)==1
         STRU=STRU[0]
-        ret.append([ID, np.array(SEQ), np.array(STRU), np.array(LABEL)])
+        ret.append([ID, np.array(SEQ), np.array(STRU), np.array(LABEL), np.array(fgt), seq0])
         print(len(ret))
         #print(ID)
     return ret
@@ -68,8 +76,8 @@ class TrainDataSet():
         def reader():
             for idx in range(len(self.data)):
                 data=self.data[idx]
-                id, seq, stru, label=data
-                yield id, seq, stru, label
+                id, seq, stru, label, fgt, SEQ=data
+                yield id, seq, stru, label, fgt, SEQ
         return reader
 
 
