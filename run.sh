@@ -11,5 +11,6 @@ pip install h5py
 CUDA_VISIBLE_DEVICES=0 python main.py -c tasks.rl.config
 
 # run refining 
+mkdir tasks/rl/final_trial
 python refine.py
 cp -r tasks/rl/final_trial/ result/
