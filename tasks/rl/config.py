@@ -1,5 +1,4 @@
 from models.model_lstm_gcn_param import Model 
-import torch.nn as nn
 config={
         "model":Model(1e-3),
         "train_path":"data/dev/train_full.txt",
